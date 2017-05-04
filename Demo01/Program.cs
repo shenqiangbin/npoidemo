@@ -1,5 +1,6 @@
 ﻿using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,13 +18,16 @@ namespace Demo01
         ///     设置单元格的的背景色颜色
         ///     设置字体的大小，粗体
         ///     锁定单元格不能编辑
+        ///     单元格下拉
+        ///     todo:限制输入的长度，只能输入数字
+        ///     todo:单元格宽度自动适应
         /// </summary>
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            var workbook = new HSSFWorkbook();            
+            var workbook = new HSSFWorkbook();
             var table = workbook.CreateSheet("sheetName");
-            table.ProtectSheet("nicai");            
+            table.ProtectSheet("nicai");
             var row = table.CreateRow(0);
 
             var cell = row.CreateCell(0);
@@ -49,6 +53,24 @@ namespace Demo01
             table.SetDefaultColumnStyle(1, cellStyle);
             table.SetDefaultColumnStyle(2, cellStyle);
             table.SetDefaultColumnStyle(3, cellStyle);
+
+            List<string> listData = new List<string>();
+            listData.AddRange(new string[] { "男", "女" });
+            var tempSheet = workbook.CreateSheet("sexSheet");
+            tempSheet.ProtectSheet("haha");
+
+            listData.ForEach(m => tempSheet.CreateRow(listData.IndexOf(m)).CreateCell(0).SetCellValue(m));
+
+            IName range = workbook.CreateName();
+            range.RefersToFormula = string.Format("sexSheet !$A$1:$A${0}", listData.Count);
+            range.NameName = "dicRange";
+
+            CellRangeAddressList regions = new CellRangeAddressList(1, 65535, 3, 3);
+            DVConstraint constraint = DVConstraint.CreateFormulaListConstraint(range.NameName);
+            HSSFDataValidation dataValidate = new HSSFDataValidation(regions, constraint);
+            dataValidate.CreateErrorBox("错误", "请按右侧下拉箭头选择!");//不符合约束时的提示  
+            dataValidate.ShowErrorBox = true;//显示上面提示 = True 
+            table.AddValidationData(dataValidate);
 
             using (var fs = File.OpenWrite(@"d:/demo.xls"))
             {
@@ -83,7 +105,7 @@ namespace Demo01
 
         private static IFont GetCommonFont(HSSFWorkbook workbook)
         {
-            var font = workbook.CreateFont();            
+            var font = workbook.CreateFont();
             font.FontHeightInPoints = 12;
             font.Boldweight = (short)NPOI.SS.UserModel.FontBoldWeight.Normal;
             //font.Boldweight = 20;
