@@ -20,7 +20,7 @@ namespace Demo01
         ///     锁定单元格不能编辑
         ///     单元格下拉
         ///     todo:限制输入的长度，只能输入数字
-        ///     todo:单元格宽度自动适应
+        ///     单元格宽度自动适应
         /// </summary>
         /// <param name="args"></param>
         static void Main(string[] args)
@@ -28,7 +28,7 @@ namespace Demo01
             var workbook = new HSSFWorkbook();
             var table = workbook.CreateSheet("sheetName");
             table.ProtectSheet("nicai");
-            var row = table.CreateRow(0);
+            var row = table.CreateRow(0);  
 
             var cell = row.CreateCell(0);
             cell.SetCellValue("编号");
@@ -48,11 +48,19 @@ namespace Demo01
 
             var cellStyle = workbook.CreateCellStyle();
             cellStyle.IsLocked = false;
+            
             cellStyle.SetFont(GetCommonFont(workbook));
             table.SetDefaultColumnStyle(0, cellStyle);
             table.SetDefaultColumnStyle(1, cellStyle);
             table.SetDefaultColumnStyle(2, cellStyle);
             table.SetDefaultColumnStyle(3, cellStyle);
+
+            //设置宽度
+            table.SetColumnWidth(0, 16 * 256 + 200); // 200为常量，这样即可控制列宽为16
+            table.SetColumnWidth(1, 16 * 256 + 200);
+            table.SetColumnWidth(2, 16 * 256 + 200);
+
+            AutoCellWidth(table, 4);
 
             List<string> listData = new List<string>();
             listData.AddRange(new string[] { "男", "女" });
@@ -111,6 +119,38 @@ namespace Demo01
             //font.Boldweight = 20;
 
             return font;
+        }
+
+        private static void AutoCellWidth(ISheet paymentSheet, int rowsCount)
+        {
+            for (int columnNum = 0; columnNum <= rowsCount; columnNum++)
+            {
+                int columnWidth = paymentSheet.GetColumnWidth(columnNum) / 256;
+                for (int rowNum = 1; rowNum <= paymentSheet.LastRowNum; rowNum++)
+                {
+                    IRow currentRow;
+                    //当前行未被使用过
+                    if (paymentSheet.GetRow(rowNum) == null)
+                    {
+                        currentRow = paymentSheet.CreateRow(rowNum);
+                    }
+                    else
+                    {
+                        currentRow = paymentSheet.GetRow(rowNum);
+                    }
+
+                    if (currentRow.GetCell(columnNum) != null)
+                    {
+                        ICell currentCell = currentRow.GetCell(columnNum);
+                        int length = Encoding.Default.GetBytes(currentCell.ToString()).Length;
+                        if (columnWidth < length)
+                        {
+                            columnWidth = length;
+                        }
+                    }
+                }
+                paymentSheet.SetColumnWidth(columnNum, columnWidth * 256);
+            }
         }
     }
 
