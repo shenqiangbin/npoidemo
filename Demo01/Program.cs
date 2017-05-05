@@ -25,10 +25,13 @@ namespace Demo01
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+
             var workbook = new HSSFWorkbook();
             var table = workbook.CreateSheet("sheetName");
-            table.ProtectSheet("nicai");
-            var row = table.CreateRow(0);  
+            //table.ProtectSheet("nicai");
+            var row = table.CreateRow(0);
+
+            table.CreateFreezePane(0, 1);
 
             var cell = row.CreateCell(0);
             cell.SetCellValue("编号");
@@ -47,7 +50,7 @@ namespace Demo01
             SetColor(workbook, cell, 128, 128, 128);
 
             var cellStyle = workbook.CreateCellStyle();
-            cellStyle.IsLocked = false;
+            //cellStyle.IsLocked = false;
             
             cellStyle.SetFont(GetCommonFont(workbook));
             table.SetDefaultColumnStyle(0, cellStyle);
