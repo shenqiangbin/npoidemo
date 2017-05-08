@@ -25,6 +25,14 @@ namespace Demo01
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+            ExcelTemplate template = new ExcelTemplate("haha");
+            template.EnableProtect = true;
+            template.Columns.Add(new ExcelColumn { Index = 1, ColName = "编号", ColWidth = 20 });
+            template.Columns.Add(new ExcelColumn { Index = 0, ColName = "姓名", ColWidth = 20 });
+            template.Columns.Add(new ExcelColumn { Index = 2, ColName = "性别", ColWidth = 20, DataSource = new List<string> { "男", "女" } });
+            template.Columns.Add(new ExcelColumn { Index = 3, ColName = "年级", ColWidth = 20, DataSource = new List<string> { "1班", "2班", "3班" } });
+            template.Save(@"d:\");
+            return;
 
             var workbook = new HSSFWorkbook();
             var table = workbook.CreateSheet("sheetName");
@@ -51,7 +59,7 @@ namespace Demo01
 
             var cellStyle = workbook.CreateCellStyle();
             //cellStyle.IsLocked = false;
-            
+
             cellStyle.SetFont(GetCommonFont(workbook));
             table.SetDefaultColumnStyle(0, cellStyle);
             table.SetDefaultColumnStyle(1, cellStyle);
