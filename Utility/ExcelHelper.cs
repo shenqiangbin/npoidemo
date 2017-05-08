@@ -75,6 +75,8 @@ namespace Utility
         {
             if (col.DataType == typeof(DateTime))
                 cell.SetCellValue(DateTime.Parse(val.ToString()).ToShortDateString());
+            else if (col.DataType == typeof(System.DBNull))
+                cell.SetCellValue("");
             else
                 cell.SetCellValue(val.ToString());
         }
