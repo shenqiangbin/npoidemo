@@ -28,6 +28,12 @@ namespace Utility
         /// </summary>
 
         public bool EnableProtect { get; set; }
+
+        /// <summary>
+        /// 额外信息
+        /// </summary>
+        public Dictionary<string, string> DataDic { get; set; }
+
         private HSSFWorkbook _workbook;
 
         public ExcelTemplate(string name)
@@ -35,6 +41,7 @@ namespace Utility
             //this.FileName = string.Format("{0}_{1}.xls", name, DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss"));
             this.FileName = string.Format("{0}.xls", name);
             this.Columns = new List<ExcelColumn>();
+            this.DataDic = new Dictionary<string, string>();
         }
 
         public void Save(string path)
@@ -66,14 +73,14 @@ namespace Utility
             InitWorkbook();
 
             Stream stream = new MemoryStream();
-            _workbook.Write(stream);            
+            _workbook.Write(stream);
 
             System.Globalization.CultureInfo myCItrad = new System.Globalization.CultureInfo("ZH-CN", true);
             HttpResponseMessage response = new HttpResponseMessage { Content = new StreamContent(stream) };
             response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
             {
                 FileName = getFileName(),
-            };            
+            };
 
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
             response.Content.Headers.ContentLength = stream.Length;
@@ -106,6 +113,8 @@ namespace Utility
 
             CreateColumnTitles(table);
             SetColumnStyle(table);
+
+            CreateDataDic();
         }
 
         private void CreateColumnTitles(ISheet sheet)
@@ -200,7 +209,23 @@ namespace Utility
 
             sheet.AddValidationData(dataValidate);
         }
+
+        private void CreateDataDic()
+        {
+            var sheetName = string.Format("DataDic");
+            var tempSheet = _workbook.CreateSheet("DataDic");
+            _workbook.SetSheetHidden(_workbook.GetSheetIndex(sheetName), true);
+            tempSheet.ProtectSheet(Guid.NewGuid().ToString());
+
+            int i = 0;
+            foreach (var item in this.DataDic)
+            {
+                var row = tempSheet.CreateRow(i++);
+                row.CreateCell(0).SetCellValue(item.Key);
+                row.CreateCell(1).SetCellValue(item.Value);
+            }
+        }
     }
 
-   
+
 }

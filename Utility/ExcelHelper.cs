@@ -164,8 +164,9 @@ namespace Utility
         /// </summary>
         /// <param name="strFileName">excel文档路径</param>
         /// <returns></returns>
-        public DataTable Excel2DataTable(string strFileName)
+        public DataTableResult Excel2DataTable(string strFileName)
         {
+            DataTableResult result = new DataTableResult();
             DataTable dt = new DataTable();
 
             HSSFWorkbook hssfworkbook;
@@ -198,7 +199,24 @@ namespace Utility
 
                 dt.Rows.Add(dataRow);
             }
-            return dt;
+
+            result.DataTable = dt;
+
+            Dictionary<string, string> dataDic = new Dictionary<string, string>();
+
+            var dataDicSheet = hssfworkbook.GetSheet("DataDic") as HSSFSheet;
+            if (dataDicSheet != null)
+            {
+                for (int i = 0; i < dataDicSheet.LastRowNum; i++)
+                {
+                    HSSFRow row = dataDicSheet.GetRow(i) as HSSFRow;
+                    dataDic.Add(row.GetCell(0).ToString(), row.GetCell(1).ToString());
+                }
+            }
+
+            result.DataDic = dataDic;
+
+            return result;
         }
 
         public DataTable GetFakeTable()
@@ -233,6 +251,12 @@ namespace Utility
                 new Person { Id = 3, Name = "小李", Birthday =  DateTime.Parse("1991-12-13")},
             };
         }
+    }
+
+    public class DataTableResult
+    {
+        public DataTable DataTable { get; set; }
+        public Dictionary<string,string> DataDic { get; set; }
     }
 
     public class Person

@@ -22,6 +22,10 @@ namespace WebUI.Controllers
         {
             ExcelTemplate template = new ExcelTemplate("人员导入模板");
             template.EnableProtect = true;
+            template.DataDic = new Dictionary<string, string> {
+                { "硬座", "1" }, { "无座", "1" }, { "软座", "1" }, { "硬卧", "3" },
+                { "软卧", "4" }, { "高级软卧", "1" }, { "一等座", "M" }, { "二等座", "O" }, { "特等座", "P" }, { "商务座", "9" }
+            };
             template.Columns.Add(new ExcelColumn { Index = 1, ColName = "编号", ColWidth = 20 });
             template.Columns.Add(new ExcelColumn { Index = 0, ColName = "姓名", ColWidth = 20 });
             template.Columns.Add(new ExcelColumn { Index = 3, ColName = "性别", ColWidth = 20, DataSource = new List<string> { "男", "女" } });
@@ -41,7 +45,7 @@ namespace WebUI.Controllers
 
         public ActionResult ImportTest()
         {
-            string path = "D:/web测试1.xls";
+            string path = "D:/人员导入模板 (10).xls";
             ExcelHelper excelHelper = new ExcelHelper();
             var table = excelHelper.Excel2DataTable(path);
             return Content("ok");
