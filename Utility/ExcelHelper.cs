@@ -207,7 +207,7 @@ namespace Utility
             var dataDicSheet = hssfworkbook.GetSheet("DataDic") as HSSFSheet;
             if (dataDicSheet != null)
             {
-                for (int i = 0; i < dataDicSheet.LastRowNum; i++)
+                for (int i = 0; i <= dataDicSheet.LastRowNum; i++)
                 {
                     HSSFRow row = dataDicSheet.GetRow(i) as HSSFRow;
                     dataDic.Add(row.GetCell(0).ToString(), row.GetCell(1).ToString());
