@@ -198,7 +198,7 @@ namespace Utility
             col.DataSource.ForEach(m => tempSheet.CreateRow(col.DataSource.IndexOf(m)).CreateCell(0).SetCellValue(m));
 
             IName range = _workbook.CreateName();
-            range.RefersToFormula = string.Format("{0} !$A$1:$A${1}", sheetName, col.DataSource.Count);
+            range.RefersToFormula = string.Format("{0} !$A$1:$A${1}", sheetName, Math.Max(1, col.DataSource.Count));
             range.NameName = string.Format("{0}range", col.ColName);
 
             CellRangeAddressList regions = new CellRangeAddressList(1, 65535, col.Index, col.Index);
