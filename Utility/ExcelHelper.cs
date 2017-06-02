@@ -191,13 +191,18 @@ namespace Utility
                 HSSFRow row = sheet.GetRow(i) as HSSFRow;
                 DataRow dataRow = dt.NewRow();
 
+                bool isEmpty = true;
                 for (int j = row.FirstCellNum; j < cellCount; j++)
                 {
-                    if (row.GetCell(j) != null)
+                    if (row.GetCell(j) != null && !string.IsNullOrEmpty(row.GetCell(j).ToString()))
+                    {
                         dataRow[j] = row.GetCell(j).ToString();
-                }
+                        isEmpty = false;
+                    }
 
-                dt.Rows.Add(dataRow);
+                }
+                if (!isEmpty)
+                    dt.Rows.Add(dataRow);
             }
 
             result.DataTable = dt;
