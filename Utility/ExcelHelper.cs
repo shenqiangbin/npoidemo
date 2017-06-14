@@ -126,7 +126,7 @@ namespace Utility
 
         private void SetExcelRowVal<T>(IRow excelRow, T item)
         {
-            var properties = typeof(T).GetProperties();
+            var properties = item.GetType().GetProperties();
             for (int i = 0; i < properties.Length; i++)
             {
                 var property = properties[i];
