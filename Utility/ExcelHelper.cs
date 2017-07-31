@@ -130,7 +130,7 @@ namespace Utility
             for (int i = 0; i < properties.Length; i++)
             {
                 var property = properties[i];
-                var val = property.GetValue(item);
+                var val = property.GetValue(item, null);
 
                 //ICell cell = ;
                 //cell.SetCellValue(val.ToString());
@@ -166,14 +166,24 @@ namespace Utility
         /// <returns></returns>
         public DataTableResult Excel2DataTable(string strFileName)
         {
+            using (FileStream file = new FileStream(strFileName, FileMode.Open, FileAccess.Read))
+            {
+                return Excel2DataTable(file);
+            }
+        }
+
+        /// <summary>读取excel
+        /// 默认第一行为标头
+        /// </summary>
+        /// <param name="strFileName">Stream</param>
+        /// <returns></returns>
+        public DataTableResult Excel2DataTable(Stream stream)
+        {
             DataTableResult result = new DataTableResult();
             DataTable dt = new DataTable();
 
-            HSSFWorkbook hssfworkbook;
-            using (FileStream file = new FileStream(strFileName, FileMode.Open, FileAccess.Read))
-            {
-                hssfworkbook = new HSSFWorkbook(file);
-            }
+            HSSFWorkbook hssfworkbook = new HSSFWorkbook(stream);
+
             HSSFSheet sheet = hssfworkbook.GetSheetAt(0) as HSSFSheet;
             System.Collections.IEnumerator rows = sheet.GetRowEnumerator();
 
@@ -219,6 +229,22 @@ namespace Utility
                 }
             }
 
+            result.OtherDics = new Dictionary<string, List<string>>();
+            for (int i = 1; i < hssfworkbook.NumberOfSheets; i++)
+            {
+                var theSheet = hssfworkbook.GetSheetAt(i);
+                if (theSheet.SheetName.EndsWith("DataSource"))
+                {
+                    List<string> list = new List<string>();
+                    for (int j = 0; j <= theSheet.LastRowNum; j++)
+                    {
+                        HSSFRow row = theSheet.GetRow(j) as HSSFRow;
+                        list.Add(row.GetCell(0).ToString());
+                    }
+                    result.OtherDics.Add(theSheet.SheetName, list);
+                }
+            }
+
             result.DataDic = dataDic;
 
             return result;
@@ -261,7 +287,8 @@ namespace Utility
     public class DataTableResult
     {
         public DataTable DataTable { get; set; }
-        public Dictionary<string,string> DataDic { get; set; }
+        public Dictionary<string, string> DataDic { get; set; }
+        public Dictionary<string, List<string>> OtherDics { get; set; }
     }
 
     public class Person
