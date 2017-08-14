@@ -11,12 +11,24 @@ using System.Web;
 
 namespace Utility
 {
+    public enum ExcelColumnType
+    {
+        Default,
+        Text
+    }
+
     public class ExcelColumn
     {
         public int Index { get; set; }
         public string ColName { get; set; }
         public int? ColWidth { get; set; }
         public List<string> DataSource { get; set; }
+        public ExcelColumnType ColumnType { get; set; }
+
+        public ExcelColumn()
+        {
+            this.ColumnType = ExcelColumnType.Text;
+        }
     }
 
     public class ExcelTemplate
@@ -35,6 +47,7 @@ namespace Utility
         public Dictionary<string, string> DataDic { get; set; }
 
         private HSSFWorkbook _workbook;
+        private short _dataFormat_text;
 
         public ExcelTemplate(string name)
         {
@@ -107,11 +120,13 @@ namespace Utility
             var table = _workbook.CreateSheet();
 
             if (this.EnableProtect)
-                table.ProtectSheet(Guid.NewGuid().ToString());
+                table.ProtectSheet("sqb");
 
             table.CreateFreezePane(0, 1);
 
             CreateColumnTitles(table);
+
+            _dataFormat_text = _workbook.CreateDataFormat().GetFormat("text");
             SetColumnStyle(table);
 
             CreateDataDic();
@@ -132,11 +147,11 @@ namespace Utility
         private ICellStyle GetHeaderStyle(int red, int green, int blue)
         {
             var cellStyle = _workbook.CreateCellStyle();
-            cellStyle.FillPattern = FillPattern.SolidForeground;// 老版本可能这样写FillPatternType.SOLID_FOREGROUND;
+            //cellStyle.FillPattern = FillPattern.SolidForeground;// 老版本可能这样写FillPatternType.SOLID_FOREGROUND;
             HSSFPalette palette = _workbook.GetCustomPalette(); //调色板实例
             palette.SetColorAtIndex((short)8, (byte)184, (byte)204, (byte)228);
             var hssFColor = palette.FindColor((byte)red, (byte)green, (byte)blue);
-            cellStyle.FillForegroundColor = hssFColor.Indexed;
+            //cellStyle.FillForegroundColor = hssFColor.Indexed;
 
             cellStyle.SetFont(GetHeaderFont());
 
@@ -156,9 +171,9 @@ namespace Utility
 
         private void SetColumnStyle(ISheet sheet)
         {
-            var cellStyle = GetRowStyle();
             foreach (var col in this.Columns)
             {
+                var cellStyle = GetRowStyle(col);
                 sheet.SetDefaultColumnStyle(col.Index, cellStyle);
 
                 if (col.ColWidth.HasValue)
@@ -169,11 +184,14 @@ namespace Utility
             }
         }
 
-        private ICellStyle GetRowStyle()
+        private ICellStyle GetRowStyle(ExcelColumn col)
         {
             var cellStyle = _workbook.CreateCellStyle();
             cellStyle.IsLocked = false;
             cellStyle.SetFont(GetCommonFont());
+
+            if (col.ColumnType == ExcelColumnType.Text)
+                cellStyle.DataFormat = _dataFormat_text;
 
             return cellStyle;
         }
